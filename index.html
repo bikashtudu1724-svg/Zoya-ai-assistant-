@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOYA - AI Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #080d18;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 450px;
+      background: #111b2d;
+      border: 1px solid #263b5b;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 25px #087cff22;
+    }
+
+    h1 {
+      text-align: center;
+      color: #42baff;
+      letter-spacing: 5px;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #9aabc3;
+      margin-bottom: 20px;
+    }
+
+    #status {
+      text-align: center;
+      color: #42baff;
+      font-size: 13px;
+      margin-bottom: 15px;
+    }
+
+    #chat {
+      height: 350px;
+      overflow-y: auto;
+      background: #091321;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .message {
+      padding: 10px 12px;
+      margin: 9px 0;
+      border-radius: 12px;
+      max-width: 90%;
+      overflow-wrap: anywhere;
+    }
+
+    .zoya {
+      background: #193653;
+      margin-right: auto;
+    }
+
+    .user {
+      background: #075c91;
+      margin-left: auto;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid #35516f;
+      border-radius: 10px;
+      background: #091321;
+      color: white;
+      outline: none;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: white;
+      background: #087cff;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    #mic {
+      display: block;
+      margin: 12px auto 0;
+      border-radius: 50px;
+      background: #087caa;
+    }
+
+    .note {
+      text-align: center;
+      color: #91a2ba;
+      font-size: 12px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <h1>ZOYA</h1>
+    <div class="subtitle">Your Personal Assistant</div>
+
+    <div id="status">ZOYA is ready</div>
+
+    <div id="chat" aria-live="polite">
+      <div class="message zoya">
+        Hello! Main ZOYA hoon. Mujhse baat karo!
+      </div>
+    </div>
+
+    <div class="controls">
+      <input
+        id="userInput"
+        type="text"
+        placeholder="Type your message..."
+      >
+      <button id="sendBtn">Send</button>
+    </div>
+
+    <button id="mic">🎤 Speak</button>
+
+    <div class="note">
+      Voice support depends on your browser.
+    </div>
+  </main>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("userInput");
+    const statusText = document.getElementById("status");
+
+    function addMessage(text, sender) {
+      const message = document.createElement("div");
+      message.className = "message " + sender;
+      message.textContent = text;
+      chat.appendChild(message);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) {
+        statusText.textContent = "Speech is not supported";
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = "hi-IN";
+      speech.rate = 1;
+      speech.pitch = 1;
+
+      window.speechSynthesis.speak(speech);
+    }
+
+    function getReply(message) {
+      const text = message.toLowerCase();
+
+      if (
+        text.includes("hello") ||
+        text.includes("hi") ||
+        text.includes("hey") ||
+        text.includes("नमस्ते")
+      ) {
+        return "Hello! Main ZOYA hoon. Kaise madad kar sakti hoon?";
+      }
+
+      if (
+        text.includes("your name") ||
+        text.includes("naam")
+      ) {
+        return "Mera naam ZOYA hai. Main tumhari personal assistant hoon.";
+      }
+
+      if (
+        text.includes("time") ||
+        text.includes("समय")
+      ) {
+        return "Abhi ka time hai " +
+          new Date().toLocaleTimeString("en-IN");
+      }
+
+      if (
+        text.includes("date") ||
+        text.includes("तारीख")
+      ) {
+        return "Aaj ki date hai " +
+          new Date().toLocaleDateString("en-IN");
+      }
+
+      if (
+        text.includes("how are you") ||
+        text.includes("kaisi ho")
+      ) {
+        return "Main bilkul ready hoon! Tum batao, kya karna hai?";
+      }
+
+      return "Maine tumhari baat sun li. Abhi mera AI brain connect nahi hua hai. Ye mera basic demo version hai.";
+    }
+
+    function sendMessage() {
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      addMessage(message, "user");
+      input.value = "";
+
+      const reply = getReply(message);
+
+      setTimeout(() => {
+        addMessage(reply, "zoya");
+        speak(reply);
+      }, 400);
+    }
+
+    document.getElementById("sendBtn")
+      .addEventListener("click", sendMessage);
+
+    input.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    document.getElementById("mic")
+      .addEventListener("click", function() {
+        if (!SpeechRecognition) {
+          statusText.textContent =
+            "Speech recognition is not supported. Try Chrome.";
+          return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = "hi-IN";
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        statusText.textContent = "Listening...";
+
+        recognition.onresult = function(event) {
+          input.value = event.results[0][0].transcript;
+          statusText.textContent = "You can send your message now";
+          sendMessage();
+        };
+
+        recognition.onerror = function() {
+          statusText.textContent =
+            "Microphone error. Check browser permission.";
+        };
+
+        recognition.onend = function() {
+          if (statusText.textContent === "Listening...") {
+            statusText.textContent = "ZOYA is ready";
+          }
+        };
+
+        recognition.start();
+      });
+  </script>
+</body>
+</html>
